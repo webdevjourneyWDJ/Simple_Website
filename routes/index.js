@@ -8,8 +8,7 @@ module.exports = (params) => {
     const { speakerService } = params
 
     router.get('/', async (req, res) => {
-        const topSpeakers = await speakerService.getList()
-        console.log(topSpeakers)        
+        const topSpeakers = await speakerService.getList()      
         res.render('layout', {template: 'home', topSpeakers})
     })
 

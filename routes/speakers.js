@@ -6,11 +6,12 @@ module.exports = (params) => {
     
     router.get('/', async (req, res) => {
         const speakers = await speakerService.getList()
-        return res.json(speakers)
+        res.render("layout", {template: "speakers", speakers})
     })
 
-    router.get('/:speaker', (req, res) => {
-        res.send(`This is the details page for ${req.params.speaker}`)
+    router.get('/:shortname', async (req, res) => {
+        const speaker = await speakerService.getSpeaker(req.params.shortname)
+        res.render("layout", {template: "speaker-detail", speaker})
     })
 
     return router
