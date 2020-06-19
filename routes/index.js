@@ -7,9 +7,14 @@ const feedbackRoute = require('./feedback')
 module.exports = (params) => {
     const { speakerService } = params
 
-    router.get('/', async (req, res) => {
-        const topSpeakers = await speakerService.getList()      
-        res.render('layout', {template: 'home', topSpeakers})
+    router.get('/', async (req, res, next) => {
+        try{
+            const topSpeakers = await speakerService.getList()      
+            const artworks = await speakerService.getAllArtwork() 
+            res.render('layout', {template: 'home', topSpeakers, artworks})
+        }catch(err){
+            return next(err)
+        }
     })
 
     router.use('/speakers', speakersRoute(params))
