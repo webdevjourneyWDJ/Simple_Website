@@ -1,6 +1,7 @@
 const express = require('express')
 const path = require('path')
 const createError = require('http-errors')
+const cookieSession = require('cookie-session')
 
 const FeedbackService = require('./services/FeedbackService')
 const SpeakerService = require('./services/SpeakerService')
@@ -13,11 +14,18 @@ const routes = require('./routes')
 const app = express()
 const port = 4000
 
-app.set('view engine', 'ejs')
-app.set('views', path.join(__dirname, "./views"))
-
 app.locals.siteName = "Art Meetups"
 
+app.use(
+    cookieSession({
+        name: 'session',
+        keys: ['FGD456d45fgh', 'GR64dh654h']
+    })
+)
+
+app.set('view engine', 'ejs')
+app.set('views', path.join(__dirname, "./views"))
+app.use(express.urlencoded({extended: true}))
 app.use(express.static(path.join(__dirname, "./static")))
 
 app.use(async (req, res, next) => {
