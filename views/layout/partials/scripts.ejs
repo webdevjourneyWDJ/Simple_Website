@@ -7,5 +7,10 @@
     integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous">
   </script>
 
-
+<% if(locals.artworks) {%>
   <script src="/js/pixgrid.js"></script>
+<% } %>
+
+<% if(locals.feedbacks) {%>
+  <script src="/js/feedback.js"></script>
+<% } %>

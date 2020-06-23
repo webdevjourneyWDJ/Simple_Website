@@ -2,6 +2,29 @@ const express = require('express')
 const router = express.Router()
 const {check, validationResult} = require('express-validator')
 
+const validationArr = [
+    check('name')
+        .trim()
+        .isLength({min: 3})
+        .escape()
+        .withMessage('A name is required'),
+    check('email')
+        .trim()
+        .isEmail()
+        .normalizeEmail()
+        .withMessage('A valid email is required'),
+    check('title')
+        .trim()
+        .isLength({min: 5})
+        .escape()
+        .withMessage('A title is required'),
+    check('message')
+        .trim()
+        .isLength({min: 5})
+        .escape()
+        .withMessage('A message is required'),
+];
+
 module.exports = (params) => {
     const {feedbackService} = params
     
@@ -19,47 +42,46 @@ module.exports = (params) => {
         }
     })
 
-    router.post('/',
-    [
-        check('name')
-            .trim()
-            .isLength({min: 3})
-            .escape()
-            .withMessage('A name is required'),
-        check('email')
-            .trim()
-            .isEmail()
-            .normalizeEmail()
-            .withMessage('A valid email is required'),
-        check('title')
-            .trim()
-            .isLength({min: 5})
-            .escape()
-            .withMessage('A title is required'),
-        check('message')
-            .trim()
-            .isLength({min: 5})
-            .escape()
-            .withMessage('A message is required'),
-    ],
-    async (req, res) => {
-        const errors = validationResult(req)    
+    router.post('/',validationArr, async (req, res) => {
+        try{
+            const errors = validationResult(req)    
         
-        if(!errors.isEmpty()) {
+            if(!errors.isEmpty()) {
+                req.session.feedback = {
+                    errors: errors.array()
+                }
+    
+                return res.redirect('/feedback')
+            }
+    
+            const {name, email, title, message} = req.body
+            await feedbackService.addEntry(name, email, title, message)
             req.session.feedback = {
-                errors: errors.array()
+                message: 'Thank you for your feedback'
+            }
+            
+            return res.redirect('/feedback')
+        }catch(err){
+            return next(err)
+        }
+    })
+
+    router.post('/api', validationArr, async(req, res, nexy) => {
+        try{
+            const errors = validationResult(req)
+            if(!errors.isEmpty()){
+                return res.json({errors: errors.array()})
             }
 
-            return res.redirect('/feedback')
-        }
+            const {name, email, title, message} = req.body
+            await feedbackService.addEntry(name, email, title, message)
+            
+            const feedback = await feedbackService.getList()
+            return res.json({feedback, successMessage: "Thank you for your feedback"})
 
-        const {name, email, title, message} = req.body
-        await feedbackService.addEntry(name, email, title, message)
-        req.session.feedback = {
-            message: 'Thank you for your feedback'
+        }catch(err){
+            return next(err)
         }
-        
-        return res.redirect('/feedback')
     })
 
     return router
